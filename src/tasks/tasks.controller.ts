@@ -1,9 +1,9 @@
 import {Body, Controller, Delete, Get, Param, Patch, Post, Query} from '@nestjs/common';
 import {TasksService} from "./tasks.service";
-import {TasksModel, TaskStatus} from "./tasks.model";
 import {CreateTaskDto} from "./dto/create-task.dto";
 import {GetTaskFilterDto} from "./dto/get-task-filter.dto";
 import {UpdateTaskStatusDto} from "./dto/update-task-status.dto";
+import { TaskEntity } from './task.entity';
 
 @Controller('tasks')
 export class TasksController {
@@ -11,32 +11,24 @@ export class TasksController {
     }
 
     @Get()
-    getAllTasks(@Query() filterDto: GetTaskFilterDto): TasksModel[] {
-        if (Object.keys(filterDto).length) {
-            return this.tasksService.getTasksWithFilters(filterDto);
-        } else {
-            return this.tasksService.getAllTasks();
-        }
+    getTasks(@Query() filterDto: GetTaskFilterDto): Promise<TaskEntity[]> {
+        console.log('get all tasks');
+        return this.tasksService.getTasks(filterDto);
     }
 
     @Get('/:id')
-    getTaskByID(@Param('id') id: string) {
+    getTaskByID(@Param('id') id: string): Promise<TaskEntity> {
+        console.log('get task by id');
         return this.tasksService.getTaskByID(id);
     }
 
-    // implementation without DTO
-    // @Post()
-    // createTask(@Body('title') title: string, @Body('description') description: string): TasksModel {
-    //     return this.tasksService.createTask(title, description);
-    // }
-
     @Post()
-    createTask(@Body() createTaskDto: CreateTaskDto): TasksModel {
+    createTask(@Body() createTaskDto: CreateTaskDto): Promise<TaskEntity> {
         return this.tasksService.createTask(createTaskDto);
     }
 
     @Delete('/:id')
-    deleteTask(@Param('id') id: string) {
+    deleteTask(@Param('id') id: string): Promise<void> {
         return this.tasksService.deleteTask(id);
     }
 
@@ -44,7 +36,7 @@ export class TasksController {
     updateTaskStatus(
         @Param('id') id: string,
         @Body() updateTaskStatusDtp: UpdateTaskStatusDto
-    ): TasksModel {
+    ): Promise<TaskEntity> {
         console.log(id);
         console.log(updateTaskStatusDtp.status);
         return this.tasksService.updateStatus(id, updateTaskStatusDtp.status);
